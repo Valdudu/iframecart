@@ -81,8 +81,8 @@ class Iframecart extends Module
         /**
          * If values have been submitted in the form, process.
          */
-        if (((bool)Tools::isSubmit('submitIframecartModule')) == true) {
-            $this->postProcess();
+        if(Tools::isSubmit('addnew')) {
+            return $this->renderForm();
         }
         $this->context->smarty->assign([
             'form' =>            $this->renderList()
@@ -122,7 +122,7 @@ class Iframecart extends Module
         $helper->actions = array('edit', 'delete');
         $helper->identifier = 'id_iframecart';
         $helper->show_toolbar = true;
-        $helper->title = 'HelperList';
+        $helper->title = $this->l('Cart list');
         $helper->table = 'iframecart';
         $helper->listTotal = sizeof($datas);
         $helper->token = Tools::getAdminTokenLite('AdminModules');
@@ -155,5 +155,8 @@ class Iframecart extends Module
     {
         $this->context->controller->addJS($this->_path.'/views/js/front.js');
         $this->context->controller->addCSS($this->_path.'/views/css/front.css');
+    }
+    protected function renderForm($id=0){
+        return $this->display(__FILE__,'views/templates/admin/form.tpl');
     }
 }
