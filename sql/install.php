@@ -32,6 +32,7 @@ $sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'iframecart` (
     PRIMARY KEY  (`id_iframecart`)
 ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8mb4;';
 $sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'iframecart_detail` (
+    `id_iframecart_detail` int (11) NOT NULL UNIQUE AUTO_INCREMENT,
     `id_iframecart` int (11) NOT NULL,
     `id_product` int (10) UNSIGNED NOT NULL,
     `id_product_attribute` int(10) UNSIGNED NOT NULL DEFAULT 0,
