@@ -27,6 +27,7 @@
 if (!defined('_PS_VERSION_')) {
     exit;
 }
+include(__DIR__.'/class/iframeCart.php');
 
 class Iframecart extends Module
 {
@@ -83,117 +84,58 @@ class Iframecart extends Module
         if (((bool)Tools::isSubmit('submitIframecartModule')) == true) {
             $this->postProcess();
         }
-
-        $this->context->smarty->assign('module_dir', $this->_path);
-
-        $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
-
-        return $output.$this->renderForm();
+        $this->context->smarty->assign([
+            'form' =>            $this->renderList()
+        ]);
+        return $this->display(__FILE__,'views/templates/admin/configure.tpl');
     }
 
-    /**
-     * Create the form that will be displayed in the configuration of your module.
-     */
-    protected function renderForm()
-    {
-        $helper = new HelperForm();
-
-        $helper->show_toolbar = false;
-        $helper->table = $this->table;
-        $helper->module = $this;
-        $helper->default_form_language = $this->context->language->id;
-        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
-
-        $helper->identifier = $this->identifier;
-        $helper->submit_action = 'submitIframecartModule';
-        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
-            .'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
-        $helper->token = Tools::getAdminTokenLite('AdminModules');
-
-        $helper->tpl_vars = array(
-            'fields_value' => $this->getConfigFormValues(), /* Add values for your inputs */
-            'languages' => $this->context->controller->getLanguages(),
-            'id_language' => $this->context->language->id,
-        );
-
-        return $helper->generateForm(array($this->getConfigForm()));
-    }
-
-    /**
-     * Create the structure of your form.
-     */
-    protected function getConfigForm()
-    {
-        return array(
-            'form' => array(
-                'legend' => array(
-                'title' => $this->l('Settings'),
-                'icon' => 'icon-cogs',
-                ),
-                'input' => array(
-                    array(
-                        'type' => 'switch',
-                        'label' => $this->l('Live mode'),
-                        'name' => 'IFRAMECART_LIVE_MODE',
-                        'is_bool' => true,
-                        'desc' => $this->l('Use this module in live mode'),
-                        'values' => array(
-                            array(
-                                'id' => 'active_on',
-                                'value' => true,
-                                'label' => $this->l('Enabled')
-                            ),
-                            array(
-                                'id' => 'active_off',
-                                'value' => false,
-                                'label' => $this->l('Disabled')
-                            )
-                        ),
-                    ),
-                    array(
-                        'col' => 3,
-                        'type' => 'text',
-                        'prefix' => '<i class="icon icon-envelope"></i>',
-                        'desc' => $this->l('Enter a valid email address'),
-                        'name' => 'IFRAMECART_ACCOUNT_EMAIL',
-                        'label' => $this->l('Email'),
-                    ),
-                    array(
-                        'type' => 'password',
-                        'name' => 'IFRAMECART_ACCOUNT_PASSWORD',
-                        'label' => $this->l('Password'),
-                    ),
-                ),
-                'submit' => array(
-                    'title' => $this->l('Save'),
-                ),
+    protected function renderList(){
+        $fields_list = array(
+            'id_iframecart' => array(
+                'title' => $this->l('ID'),
+                'width' => 120,
+                'type' => 'text',
+                'search' => false,
+                'orderby' => false
+            ),
+            'title' => array(
+                'title' => $this->l('Titre'),
+                'width' => 420,
+                'type' => 'text',
+                'search' => true,
+                'orderby' => false
+            ),
+            'active' => array(
+                'title' => $this->l('Active'),
+                'width' => 140,
+                'type' => 'bool',
+                'search' => false,
+                'orderby' => false,
+                'active' => 'status'
             ),
         );
-    }
-
-    /**
-     * Set values for the inputs.
-     */
-    protected function getConfigFormValues()
-    {
-        return array(
-            'IFRAMECART_LIVE_MODE' => Configuration::get('IFRAMECART_LIVE_MODE', true),
-            'IFRAMECART_ACCOUNT_EMAIL' => Configuration::get('IFRAMECART_ACCOUNT_EMAIL', 'contact@prestashop.com'),
-            'IFRAMECART_ACCOUNT_PASSWORD' => Configuration::get('IFRAMECART_ACCOUNT_PASSWORD', null),
+        $datas = FrameCart::getAllCarts();
+        $helper = new HelperList();   
+        $helper->shopLinkType = '';        
+        $helper->simple_header = false;       
+        $helper->actions = array('edit', 'delete');
+        $helper->identifier = 'id_iframecart';
+        $helper->show_toolbar = true;
+        $helper->title = 'HelperList';
+        $helper->table = 'iframecart';
+        $helper->listTotal = sizeof($datas);
+        $helper->token = Tools::getAdminTokenLite('AdminModules');
+        $helper->currentIndex = AdminController::$currentIndex.'&configure='.$this->name;
+        $helper->toolbar_btn['new'] =  array(
+            'href' => (Context::getContext()->link->getAdminLink('AdminModules').'&addnew=true&configure='.$this->name),
+            'desc' => $this->l('Add new')
         );
+        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
+        .'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
+        return $helper->generateList($datas, $fields_list);
     }
 
-    /**
-     * Save form data.
-     */
-    protected function postProcess()
-    {
-        $form_values = $this->getConfigFormValues();
-
-        foreach (array_keys($form_values) as $key) {
-            Configuration::updateValue($key, Tools::getValue($key));
-        }
-    }
 
     /**
     * Add the CSS & JavaScript files you want to be loaded in the BO.
