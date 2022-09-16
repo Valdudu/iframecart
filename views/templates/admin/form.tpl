@@ -1,4 +1,5 @@
 <form id='module_form' method='POST' action='' validate class='defaultForm form-horizontal' autocomplete="off">
+    <input type="hidden" name="cart_id">
     <div class="panel col-lg-12">
         <div class="panel-heading">		
             <i class="icon-cogs"></i>	
