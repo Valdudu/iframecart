@@ -1,4 +1,8 @@
 <?php
+use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductListingPresenter;
+use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
+use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
+use PrestaShop\PrestaShop\Adapter\Product\ProductColorsRetriever;
 class IframeCartDetail{
     private $id_iframe='';
     function __construct($id_iframe){
@@ -38,6 +42,20 @@ class IframeCartDetail{
         //need nom, id_product, id_product_attribute, id_product_name
         return $cleanProducts;
     }
+    public static function getAssembledProducts($lists){
+        $context = Context::getContext();
+        $id_lang = $context->language->id;
 
+        foreach ($lists as $key => $l) {
+            $product = new Product($l['id_product'], false, $id_lang);
+            $img = $product->getCover($product->id);
+            $image_type = 'small_default';
+            $lists[$key]['image'] = $context->link->getImageLink(isset($product->link_rewrite) ? $product->link_rewrite : $product->name, (int)$img['id_image'], $image_type);
+            $lists[$key]['link'] = $context->link->getProductLink($l['id_product']);
+            $lists[$key]['price'] = Product::getPriceStatic($l['id_product'], true, $l['id_product_attribute']);
+            $lists[$key]['available'] = ($product->available_for_order == true ? 'Disponible' : 'Indisponible');
+        }
+        return $lists;
+    }
 
 }
