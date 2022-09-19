@@ -37,11 +37,13 @@ $sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'iframecart_detail` (
     `id_product` int (10) UNSIGNED NOT NULL,
     `id_product_attribute` int(10) UNSIGNED NOT NULL DEFAULT 0,
     `quantity` int(4) NOT NULL DEFAULT 1,
-    PRIMARY KEY (`id_iframecart`,`id_product`,`id_product_attribute`)
+    PRIMARY KEY (`id_iframecart`,`id_product`,`id_product_attribute`),
+    KEY `id_product_attribute` (`id_product_attribute`)
+
 ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
 $sql[] = 'ALTER TABLE `' . _DB_PREFIX_ . 'iframecart_detail` ADD CONSTRAINT FK_IFRAMECART FOREIGN KEY(id_iframecart) REFERENCES `' . _DB_PREFIX_ . 'iframecart` (id_iframecart) ON DELETE CASCADE'; 
 $sql[] = 'ALTER TABLE `' . _DB_PREFIX_ . 'iframecart_detail` ADD CONSTRAINT FK_IFRAMECART_PRODUCT FOREIGN KEY(id_product) REFERENCES `' . _DB_PREFIX_ . 'product` (id_product) ON DELETE CASCADE'; 
-$sql[] = 'ALTER TABLE `' . _DB_PREFIX_ . 'iframecart_detail` ADD CONSTRAINT FK_IFRAMECART_PRODUCT_ATTRIBUTE FOREIGN KEY(id_product_attribute) REFERENCES `' . _DB_PREFIX_ . 'product_attribute` (id_product_attribute) ON DELETE CASCADE'; 
+//$sql[] = 'ALTER TABLE `' . _DB_PREFIX_ . 'iframecart_detail` ADD CONSTRAINT FK_IFRAMECART_PRODUCT_ATTRIBUTE FOREIGN KEY(id_product_attribute) REFERENCES `' . _DB_PREFIX_ . 'product_attribute` (id_product_attribute) ON DELETE CASCADE'; 
 foreach ($sql as $query) {
     if (Db::getInstance()->execute($query) == false) {
         return false;

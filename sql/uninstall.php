@@ -30,9 +30,9 @@
  * but does not want to loose all of the data associated to the module.
  */
 $sql = array();
-$sql[] = 'ALTER TABLE ' . _DB_PREFIX_ . 'iframecart_detail DROP FOREIGN KEY FK_IFRAMECART';
-$sql[] = 'ALTER TABLE ' . _DB_PREFIX_ . 'iframecart_detail DROP FOREIGN KEY FK_IFRAMECART_PRODUCT';
-$sql[] = 'ALTER TABLE ' . _DB_PREFIX_ . 'iframecart_detail DROP FOREIGN KEY FK_IFRAMECART_PRODUCT_ATTRIBUTE';
+//$sql[] = 'ALTER TABLE ' . _DB_PREFIX_ . 'iframecart_detail DROP FOREIGN KEY FK_IFRAMECART';
+//$sql[] = 'ALTER TABLE ' . _DB_PREFIX_ . 'iframecart_detail DROP FOREIGN KEY FK_IFRAMECART_PRODUCT';
+//$sql[] = 'ALTER TABLE ' . _DB_PREFIX_ . 'iframecart_detail DROP FOREIGN KEY FK_IFRAMECART_PRODUCT_ATTRIBUTE';
 $sql[] = 'DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'iframecart_detail';
 $sql[] = 'DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'iframecart';
 foreach ($sql as $query) {
