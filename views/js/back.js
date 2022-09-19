@@ -27,8 +27,13 @@
 */
 var counter = 0;
 $(document).ready(function () {
-
-
+    counter = $('.js_auto > .form-group').length;
+    //each create an autocomplete
+    $('.js_auto > .form-group').each(function(index){
+        //do stuff
+        createAutocomplete(index);
+        console.log(index);
+      });
 });
 
 
@@ -38,7 +43,21 @@ function createProductRow() {
     var quantity = '<div class="col-lg-1"><input type="text" value ="1" name="quantity[]" required><p class="help-block">Quantity.</p></div>';
     var deleteBtn = '<div class="col-lg-1"><a class="btn tooltip-link delete pl-0 pr-0"" style="display:inline !important;"><i class="material-icons">delete</i></a></div>';
     $('.js_auto').append('<div class="form-group">' + product + product_attribute + quantity + deleteBtn + '</div>');   
-    $('.product_name'+counter.toString()).autocomplete({
+    createAutocomplete(counter);
+    counter++;
+}
+
+
+
+$('.delete').on('click', function () {
+    console.log(this);    
+});
+$(document).on('click', '.delete', function(){
+    $('#addFeature').attr("value", parseInt($('#addFeature').val())-1);
+    $(this).parent().parent().remove();
+});
+function createAutocomplete(value) {
+    $('.product_name'+value.toString()).autocomplete({
         source: function (request, response) {
             $.ajax({
                 url : moduleAdminLink,
@@ -77,7 +96,7 @@ function createProductRow() {
             }
           }
     });
-    $('.product_attribute_name' + counter.toString()).autocomplete({
+    $('.product_attribute_name' + value.toString()).autocomplete({
         source: function (request, response) {
             $.ajax({
                 url : moduleAdminLink,
@@ -115,15 +134,4 @@ function createProductRow() {
             }
           }
     });
-    counter++;
 }
-
-
-
-$('.delete').on('click', function () {
-    console.log(this);    
-});
-$(document).on('click', '.delete', function(){
-    $('#addFeature').attr("value", parseInt($('#addFeature').val())-1);
-    $(this).parent().parent().remove();
-});
