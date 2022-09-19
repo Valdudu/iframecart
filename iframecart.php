@@ -63,6 +63,7 @@ class Iframecart extends Module
         include(__DIR__ . '/sql/install.php');
         return parent::install() &&
             $this->registerHook('header') &&
+            $this->installTab()&&
             $this->registerHook('backOfficeHeader');
     }
 
@@ -70,27 +71,68 @@ class Iframecart extends Module
     {
         include(__DIR__ . '/sql/uninstall.php');
 
-        return parent::uninstall();
+        return parent::uninstall() &&
+        $this->uninstallTab();
     }
-
+    public function installTab()
+    {
+        $tab = new Tab();
+        $tab->class_name = 'AdminIframeCart';
+        $tab->module = $this->name;
+        $tab->id_parent = (int)Tab::getIdFromClassName('SELL');
+        $tab->icon = 'shopping_basket';
+        $tab->name = array();
+        foreach(Language::getLanguages() as $lang)
+        {
+            $tab->name[$lang['id_lang']] = $this->trans('Creation de paniers', array(), 'Modules.orderbyproduct.Admin', $lang['locale']);
+        } 
+        try {
+            $tab->save();
+        } catch (Exception $e) {
+            echo $e->getMessage();
+            return false;
+        }
+        return true;
+    }
+    public function uninstallTab(){
+        $tabId = Tab::getIdFromClassName('AdminIframeCart');
+        if($tabId){
+            $tab = new Tab($tabId);
+            try{
+                $tab->delete();
+            } catch (Exception $e) {
+                echo $e->getMessage();
+                return false;
+            }
+        }
+        return true;
+    }
     /**
      * Load the configuration form
      */
     public function getContent()
     {
-        $this->context->controller->addJqueryUi('ui.autocomplete');
+      /*  $this->context->controller->addJqueryUi('ui.autocomplete');
         $this->context->controller->addJS($this->_path.'views/js/back.js');
         Media::addJsDef(['moduleAdminLink' => Context::getContext()->link->getAdminLink('AdminModules', true) . '&configure=' . $this->name . '&module_name=' . $this->name, ]);
 
-        if(Tools::isSubmit('addnew')) {
-            $this->context->smarty->assign([ 
-        ]);
-            return $this->renderForm();
+        if (Tools::getValue('submitCart') == 1) {
+            $this->postProcess();
+        }
+        elseif(Tools::isSubmit('addnew') || (Tools::isSubmit('updateiframecart') && Tools::getValue('id_iframecart') != '')) {
+            return $this->renderForm(Tools::getValue('id_iframecart'));
+        }
+        elseif (Tools::isSubmit('deleteiframecart') && Tools::getValue('id_iframecart') != '') {
+            $cart = new FrameCart(Tools::getValue('id_iframecart'));
+            $cart->delete();
+        } elseif(Tools::isSubmit('statusiframecart') && Tools::getValue('id_iframecart') != ''){
+            $cart = new FrameCart(Tools::getValue('id_iframecart'));
+            $cart->changeStatut();
         }
         $this->context->smarty->assign([
-            'form' =>            $this->renderList()
+            'form' =>            $this->renderList(), 
         ]);
-        return $this->display(__FILE__,'views/templates/admin/configure.tpl');
+        return $this->display(__FILE__,'views/templates/admin/configure.tpl');*/
     }
 
     protected function renderList(){
@@ -160,6 +202,8 @@ class Iframecart extends Module
         $this->context->controller->addCSS($this->_path.'/views/css/front.css');
     }
     protected function renderForm($id=0){
+        $this->context->smarty->assign([ 'cart' =>FrameCart::getCartArray($id)
+        ]);
         return $this->display(__FILE__,'views/templates/admin/form.tpl');
     }
     public function ajaxProcessSearchProductName(){
@@ -193,5 +237,32 @@ class Iframecart extends Module
             }
         }
         die(json_encode($cleanProducts));
+    }
+    protected function postProcess(){
+        $list = array();
+        $pId = Tools::getValue('product');
+        $paId = Tools::getValue('product_attribute');
+        $qty = Tools::getValue('quantity');
+        if(is_array($pId))
+        {        
+            foreach($pId as $k => $p){
+                $list[$k]['id_product'] = $p;
+                $list[$k]['id_product_attribute'] = $paId[$k];
+                $list[$k]['quantity'] = $qty[$k];
+            }
+        }
+            if(Tools::getValue('cart_id') ==0 ){
+            $cart = new FrameCart();
+            $cart->title = Tools::getValue('cart_title');
+            $cart->active = Tools::getValue('cart_active');
+            $cart->create();
+        } else {
+            $cart = new FrameCart(Tools::getValue('cart_id'));
+            $cart->title = Tools::getValue('cart_title');
+            $cart->active = Tools::getValue('cart_active');
+            $cart->update();
+        }
+        $cart->updateProducts($list);
+
     }
 }
